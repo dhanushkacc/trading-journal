@@ -180,36 +180,59 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
           const tfAnalysis = trade.analysis?.[tf];
           if (!tfAnalysis) return null;
 
-          // Collect confirmations from all phases (they're stored differently)
-          const confirmations = new Set<string>();
+          const dirConfs = new Set<string>();
+          const againstConfs = new Set<string>();
           Object.values(tfAnalysis).forEach((phase) => {
-            (phase.confirmations || []).forEach((c: string) => confirmations.add(c));
+            (phase.confirmations || []).forEach((c: string) => dirConfs.add(c));
+            (phase.against_confirmations || []).forEach((c: string) => againstConfs.add(c));
           });
 
-          if (confirmations.size === 0) return null;
+          if (dirConfs.size === 0 && againstConfs.size === 0) return null;
+
+          const dirColor = trade.direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)";
+          const againstColor = trade.direction === "Buy" ? "var(--accent-red)" : "var(--accent-green)";
+          const dirBadge = trade.direction === "Buy" ? "badge-green" : "badge-red";
+          const againstBadge = trade.direction === "Buy" ? "badge-red" : "badge-green";
 
           return (
-            <div key={tf} style={{ marginBottom: 10 }}>
-              <span
-                className="badge badge-blue"
-                style={{ marginBottom: 6, display: "inline-flex" }}
-              >
+            <div key={tf} style={{ marginBottom: 16 }}>
+              <span className="badge badge-blue" style={{ marginBottom: 8, display: "inline-flex" }}>
                 {tf.toUpperCase()}
               </span>
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 6,
-                  marginTop: 6,
-                }}
-              >
-                {[...confirmations].map((c) => (
-                  <span key={c} className="badge badge-amber">
-                    {c}
-                  </span>
-                ))}
-              </div>
+
+              {dirConfs.size > 0 && (
+                <div style={{
+                  padding: "10px 14px", marginTop: 6, marginBottom: 8, borderRadius: 8,
+                  border: `1px solid ${trade.direction === "Buy" ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)"}`,
+                  background: trade.direction === "Buy" ? "rgba(16,185,129,0.04)" : "rgba(239,68,68,0.04)",
+                }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: dirColor, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+                    {trade.direction === "Buy" ? "📈" : "📉"} Direction ({trade.direction})
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {[...dirConfs].map((c) => (
+                      <span key={c} className={`badge ${dirBadge}`}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {againstConfs.size > 0 && (
+                <div style={{
+                  padding: "10px 14px", borderRadius: 8,
+                  border: `1px solid ${trade.direction === "Buy" ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)"}`,
+                  background: trade.direction === "Buy" ? "rgba(239,68,68,0.04)" : "rgba(16,185,129,0.04)",
+                }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: againstColor, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+                    {trade.direction === "Buy" ? "📉" : "📈"} Against Direction ({trade.direction === "Buy" ? "Sell" : "Buy"})
+                  </p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {[...againstConfs].map((c) => (
+                      <span key={c} className={`badge ${againstBadge}`}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

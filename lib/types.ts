@@ -1,7 +1,8 @@
 export interface TimeframeAnalysis {
   trend?: string;
   mid_level?: string;
-  confirmations?: string[];
+  confirmations?: string[];          // direction-supporting confirmations
+  against_confirmations?: string[];  // against-direction confirmations
   images?: string[];  // URLs from supabase storage
 }
 

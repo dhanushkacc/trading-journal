@@ -38,6 +38,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
     Record<string, Record<string, { images: string[]; pendingFiles: File[] }>>
   >({});
   const [confirmations, setConfirmations] = useState<Record<string, string[]>>({});
+  const [againstConfirmations, setAgainstConfirmations] = useState<Record<string, string[]>>({});
   const [tfParams, setTfParams] = useState<Record<string, Record<string, string>>>({});
 
   // Accordion state for timeframes
@@ -47,6 +48,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
   useEffect(() => {
     const initTf: typeof tfData = {};
     const initConf: typeof confirmations = {};
+    const initAgainst: typeof againstConfirmations = {};
     const initParams: typeof tfParams = {};
     config.timeframes.forEach((tf) => {
       initTf[tf] = {};
@@ -54,10 +56,12 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
         initTf[tf][p] = { images: [], pendingFiles: [] };
       });
       initConf[tf] = [];
+      initAgainst[tf] = [];
       initParams[tf] = {};
     });
     setTfData(initTf);
     setConfirmations(initConf);
+    setAgainstConfirmations(initAgainst);
     setTfParams(initParams);
   }, []);
 
@@ -76,6 +80,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
 
     const newTf: typeof tfData = {};
     const newConf: typeof confirmations = {};
+    const newAgainst: typeof againstConfirmations = {};
     const newParams: typeof tfParams = {};
     config.timeframes.forEach((tf) => {
       newTf[tf] = {};
@@ -88,12 +93,14 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
       });
       const anyPhase = editingTrade.analysis?.[tf]?.before || editingTrade.analysis?.[tf]?.after;
       newConf[tf] = anyPhase?.confirmations || [];
+      newAgainst[tf] = anyPhase?.against_confirmations || [];
       newParams[tf] = {};
       if (anyPhase?.trend) newParams[tf]["trend"] = anyPhase.trend;
       if (anyPhase?.mid_level) newParams[tf]["mid_level"] = anyPhase.mid_level;
     });
     setTfData(newTf);
     setConfirmations(newConf);
+    setAgainstConfirmations(newAgainst);
     setTfParams(newParams);
   }, [editingTrade]);
 
@@ -136,6 +143,16 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
     });
   };
 
+  const toggleAgainstConfirmation = (tf: string, confId: string) => {
+    setAgainstConfirmations((prev) => {
+      const arr = prev[tf] || [];
+      return {
+        ...prev,
+        [tf]: arr.includes(confId) ? arr.filter((c) => c !== confId) : [...arr, confId],
+      };
+    });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -164,6 +181,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
           analysis[tf][phase] = {
             images: uploadedUrls,
             confirmations: confirmations[tf] || [],
+            against_confirmations: againstConfirmations[tf] || [],
             trend: tfParams[tf]?.trend,
             mid_level: tfParams[tf]?.mid_level,
           };
@@ -435,54 +453,116 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
                 )}
               </div>
 
-              {/* Confirmations */}
-              <p
-                className="section-heading"
-                style={{ fontSize: 13 }}
-              >
-                ✅ Confirmations
-              </p>
-
-              {/* Common confirmations */}
-              <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
-                Common
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-                {config.common_confirmations.map((c) => {
-                  const active = (confirmations[tf] || []).includes(c.id);
-                  return (
-                    <button key={c.id} type="button" onClick={() => toggleConfirmation(tf, c.id)}
-                      style={{ padding: "6px 14px", borderRadius: 8,
-                        border: `1px solid ${active ? "var(--accent-green)" : "var(--border)"}`,
-                        background: active ? "rgba(16, 185, 129, 0.12)" : "var(--bg-secondary)",
-                        color: active ? "var(--accent-green)" : "var(--text-secondary)",
-                        cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s",
-                      }}>
-                      {active ? "✓ " : ""}{c.label}
-                    </button>
-                  );
-                })}
+              {/* ═══ DIRECTION CONFIRMATIONS ═══ */}
+              <div style={{
+                padding: 16, marginBottom: 14, borderRadius: 10,
+                border: `1px solid ${direction === "Buy" ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)"}`,
+                background: direction === "Buy" ? "rgba(16,185,129,0.04)" : "rgba(239,68,68,0.04)",
+              }}>
+                <p style={{
+                  fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10,
+                  color: direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)",
+                }}>
+                  {direction === "Buy" ? "📈" : "📉"} Direction Confirmations ({direction})
+                </p>
+                <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                  Common
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+                  {config.common_confirmations.map((c) => {
+                    const active = (confirmations[tf] || []).includes(c.id);
+                    const accentColor = direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)";
+                    const accentBg = direction === "Buy" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)";
+                    return (
+                      <button key={c.id} type="button" onClick={() => toggleConfirmation(tf, c.id)}
+                        style={{ padding: "6px 14px", borderRadius: 8,
+                          border: `1px solid ${active ? accentColor : "var(--border)"}`,
+                          background: active ? accentBg : "var(--bg-secondary)",
+                          color: active ? accentColor : "var(--text-secondary)",
+                          cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s",
+                        }}>
+                        {active ? "✓ " : ""}{c.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                  {direction} Specific
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {(direction === "Buy" ? config.buy_confirmations : config.sell_confirmations).map((c) => {
+                    const active = (confirmations[tf] || []).includes(c.id);
+                    const accentColor = direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)";
+                    const accentBg = direction === "Buy" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)";
+                    return (
+                      <button key={c.id} type="button" onClick={() => toggleConfirmation(tf, c.id)}
+                        style={{ padding: "6px 14px", borderRadius: 8,
+                          border: `1px solid ${active ? accentColor : "var(--border)"}`,
+                          background: active ? accentBg : "var(--bg-secondary)",
+                          color: active ? accentColor : "var(--text-secondary)",
+                          cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s",
+                        }}>
+                        {active ? "✓ " : ""}{c.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Direction-specific confirmations */}
-              <p style={{ fontSize: 11, color: direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)", fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
-                {direction === "Buy" ? "📈 Buy" : "📉 Sell"} Confirmations
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
-                {(direction === "Buy" ? config.buy_confirmations : config.sell_confirmations).map((c) => {
-                  const active = (confirmations[tf] || []).includes(c.id);
-                  return (
-                    <button key={c.id} type="button" onClick={() => toggleConfirmation(tf, c.id)}
-                      style={{ padding: "6px 14px", borderRadius: 8,
-                        border: `1px solid ${active ? (direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)") : "var(--border)"}`,
-                        background: active ? (direction === "Buy" ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)") : "var(--bg-secondary)",
-                        color: active ? (direction === "Buy" ? "var(--accent-green)" : "var(--accent-red)") : "var(--text-secondary)",
-                        cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s",
-                      }}>
-                      {active ? "✓ " : ""}{c.label}
-                    </button>
-                  );
-                })}
+              {/* ═══ AGAINST DIRECTION CONFIRMATIONS ═══ */}
+              <div style={{
+                padding: 16, marginBottom: 18, borderRadius: 10,
+                border: `1px solid ${direction === "Buy" ? "rgba(239,68,68,0.25)" : "rgba(16,185,129,0.25)"}`,
+                background: direction === "Buy" ? "rgba(239,68,68,0.04)" : "rgba(16,185,129,0.04)",
+              }}>
+                <p style={{
+                  fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10,
+                  color: direction === "Buy" ? "var(--accent-red)" : "var(--accent-green)",
+                }}>
+                  {direction === "Buy" ? "📉" : "📈"} Against Direction ({direction === "Buy" ? "Sell" : "Buy"})
+                </p>
+                <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                  Common
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+                  {config.common_confirmations.map((c) => {
+                    const active = (againstConfirmations[tf] || []).includes(c.id);
+                    const accentColor = direction === "Buy" ? "var(--accent-red)" : "var(--accent-green)";
+                    const accentBg = direction === "Buy" ? "rgba(239,68,68,0.12)" : "rgba(16,185,129,0.12)";
+                    return (
+                      <button key={`ag-${c.id}`} type="button" onClick={() => toggleAgainstConfirmation(tf, c.id)}
+                        style={{ padding: "6px 14px", borderRadius: 8,
+                          border: `1px solid ${active ? accentColor : "var(--border)"}`,
+                          background: active ? accentBg : "var(--bg-secondary)",
+                          color: active ? accentColor : "var(--text-secondary)",
+                          cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s",
+                        }}>
+                        {active ? "✓ " : ""}{c.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                  {direction === "Buy" ? "Sell" : "Buy"} Specific
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {(direction === "Buy" ? config.sell_confirmations : config.buy_confirmations).map((c) => {
+                    const active = (againstConfirmations[tf] || []).includes(c.id);
+                    const accentColor = direction === "Buy" ? "var(--accent-red)" : "var(--accent-green)";
+                    const accentBg = direction === "Buy" ? "rgba(239,68,68,0.12)" : "rgba(16,185,129,0.12)";
+                    return (
+                      <button key={`ag-${c.id}`} type="button" onClick={() => toggleAgainstConfirmation(tf, c.id)}
+                        style={{ padding: "6px 14px", borderRadius: 8,
+                          border: `1px solid ${active ? accentColor : "var(--border)"}`,
+                          background: active ? accentBg : "var(--bg-secondary)",
+                          color: active ? accentColor : "var(--text-secondary)",
+                          cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s",
+                        }}>
+                        {active ? "✓ " : ""}{c.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Phase images */}
