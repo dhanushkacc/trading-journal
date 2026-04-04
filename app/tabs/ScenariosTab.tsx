@@ -11,6 +11,7 @@ import {
 } from "@/lib/api";
 import ImageGallery from "@/components/ImageGallery";
 import ImageViewer from "@/components/ImageViewer";
+import ConfirmModal from "@/components/ConfirmModal";
 import Toast from "@/components/Toast";
 import {
   Plus,
@@ -42,6 +43,10 @@ export default function ScenariosTab() {
   const [toastMsg, setToastMsg] = useState("");
   const [toastKey, setToastKey] = useState(0);
   const [viewImg, setViewImg] = useState<string | null>(null);
+  
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState<Scenario | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Form state
   const [fTitle, setFTitle] = useState("");
@@ -176,15 +181,20 @@ export default function ScenariosTab() {
     }
   };
 
-  const handleDelete = async (s: Scenario) => {
-    if (!confirm(`Permanently delete "${s.title}" and all its images?`)) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
     try {
-      await deleteScenario(s);
+      await deleteScenario(deleteTarget);
       showToast("🗑 Scenario deleted");
-      if (viewing?.scenario_id === s.scenario_id) setMode("list");
+      if (viewing?.scenario_id === deleteTarget.scenario_id) setMode("list");
       fetchAll();
     } catch (e) {
       console.error(e);
+      alert("Failed to delete. Check console.");
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -350,7 +360,7 @@ export default function ScenariosTab() {
               </button>
               <button
                 title="Delete Scenario"
-                onClick={() => handleDelete(s)}
+                onClick={() => setDeleteTarget(s)}
                 style={{
                   background: "transparent", border: "none", color: "var(--text-secondary)",
                   cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
@@ -411,7 +421,7 @@ export default function ScenariosTab() {
             </button>
             <button
               title="Delete Scenario"
-              onClick={() => handleDelete(viewing)}
+              onClick={() => setDeleteTarget(viewing)}
               style={{
                 background: "transparent", border: "none", color: "var(--text-secondary)",
                 cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
@@ -599,6 +609,16 @@ export default function ScenariosTab() {
 
       {viewImg && <ImageViewer src={viewImg} onClose={() => setViewImg(null)} />}
       {toastMsg && <Toast key={toastKey} message={toastMsg} />}
+      
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Scenario"
+        message={`Are you sure you want to permanently delete "${deleteTarget?.title}"? All associated images and notes will be removed.`}
+        confirmText="Delete Scenario"
+        isDeleting={isDeleting}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Trade } from "@/lib/types";
 import { deleteTrade } from "@/lib/api";
 import config from "@/lib/config";
 import ImageGallery from "@/components/ImageGallery";
+import ConfirmModal from "@/components/ConfirmModal";
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -21,6 +23,9 @@ interface Props {
 }
 
 export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   if (!trade) {
     return (
       <div
@@ -41,13 +46,17 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
     );
   }
 
-  const handleDelete = async () => {
-    if (!confirm("Permanently delete this trade and all its images?")) return;
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
     try {
       await deleteTrade(trade);
+      setShowDeleteModal(false);
       onDelete();
     } catch (err) {
       console.error("Delete failed", err);
+      // fallback if needed
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -105,7 +114,7 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
           </button>
           <button
             title="Delete Trade"
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             style={{
               background: "transparent", border: "none", color: "var(--text-secondary)",
               cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
@@ -276,6 +285,16 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
           );
         });
       })}
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Trade"
+        message="Are you sure you want to permanently delete this trade? All associated data and images will be removed."
+        confirmText="Delete Trade"
+        isDeleting={isDeleting}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 }
