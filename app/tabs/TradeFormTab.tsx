@@ -224,7 +224,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
   ];
 
   return (
-    <div style={{ maxWidth: 900 }}>
+    <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
       <div
         style={{
           display: "flex",

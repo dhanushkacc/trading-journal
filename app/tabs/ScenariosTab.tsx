@@ -341,7 +341,7 @@ export default function ScenariosTab() {
   const renderDetail = () => {
     if (!viewing) return null;
     return (
-      <div style={{ maxWidth: 900 }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
         <div
           style={{
             display: "flex",
@@ -415,7 +415,7 @@ export default function ScenariosTab() {
   };
 
   const renderForm = () => (
-    <div style={{ maxWidth: 800 }}>
+    <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
       <div
         style={{
           display: "flex",
