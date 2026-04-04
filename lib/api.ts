@@ -2,16 +2,58 @@ import { supabase } from "./supabase";
 import { Trade, Scenario } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
+// ─── Image Compression ────────────────────────────────────────────────────
+const MAX_WIDTH = 1600;
+const MAX_HEIGHT = 1200;
+const QUALITY = 0.75; // WebP quality (0-1)
+
+async function compressImage(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+
+      // Scale down if larger than max dimensions
+      if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+        const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Compression failed"));
+        },
+        "image/webp",
+        QUALITY
+      );
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 // ─── Image Upload ─────────────────────────────────────────────────────────
 export async function uploadImage(
   file: File,
   bucket: string = "screenshots"
 ): Promise<string> {
-  const ext = file.name.split(".").pop() || "png";
-  const filename = `${Date.now()}_${uuidv4().slice(0, 6)}.${ext}`;
+  // Compress before uploading
+  const compressed = await compressImage(file);
+  const filename = `${Date.now()}_${uuidv4().slice(0, 6)}.webp`;
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(filename, file, { upsert: false });
+    .upload(filename, compressed, {
+      upsert: false,
+      contentType: "image/webp",
+    });
   if (error) throw error;
   const {
     data: { publicUrl },

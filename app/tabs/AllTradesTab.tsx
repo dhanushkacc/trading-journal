@@ -281,10 +281,29 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
 
               {/* Action */}
               <button
-                className="btn btn-ghost btn-sm"
+                title="View Trade"
                 onClick={() => onViewTrade(trade)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--text-secondary)",
+                  cursor: "pointer",
+                  padding: 8,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--accent-blue)";
+                  e.currentTarget.style.background = "rgba(59,130,246,0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--text-secondary)";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
-                <Eye size={14} /> View
+                <Eye size={18} />
               </button>
             </div>
           </div>

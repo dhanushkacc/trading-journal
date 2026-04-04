@@ -321,15 +321,45 @@ export default function ScenariosTab() {
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <button className="btn btn-ghost btn-sm" onClick={() => openView(s)}>
-                <Eye size={14} /> View
+            <div style={{ display: "flex", flexDirection: "row", gap: 6, justifyContent: "flex-end" }}>
+              <button
+                title="View Scenario"
+                onClick={() => openView(s)}
+                style={{
+                  background: "transparent", border: "none", color: "var(--text-secondary)",
+                  cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-blue)"; e.currentTarget.style.background = "rgba(59,130,246,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+              >
+                <Eye size={18} />
               </button>
-              <button className="btn btn-primary btn-sm" onClick={() => openEdit(s)}>
-                <Pencil size={14} /> Edit
+              <button
+                title="Edit Scenario"
+                onClick={() => openEdit(s)}
+                style={{
+                  background: "transparent", border: "none", color: "var(--text-secondary)",
+                  cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-blue)"; e.currentTarget.style.background = "rgba(59,130,246,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+              >
+                <Pencil size={18} />
               </button>
-              <button className="btn btn-danger btn-sm" onClick={() => handleDelete(s)}>
-                <Trash2 size={14} /> Delete
+              <button
+                title="Delete Scenario"
+                onClick={() => handleDelete(s)}
+                style={{
+                  background: "transparent", border: "none", color: "var(--text-secondary)",
+                  cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-red)"; e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+              >
+                <Trash2 size={18} />
               </button>
             </div>
           </div>
@@ -365,12 +395,32 @@ export default function ScenariosTab() {
               {viewing.notes.length} note(s)
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn btn-primary btn-sm" onClick={() => openEdit(viewing)}>
-              <Pencil size={14} /> Edit
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              title="Edit Scenario"
+              onClick={() => openEdit(viewing)}
+              style={{
+                background: "transparent", border: "none", color: "var(--text-secondary)",
+                cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-blue)"; e.currentTarget.style.background = "rgba(59,130,246,0.1)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+            >
+              <Pencil size={18} />
             </button>
-            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(viewing)}>
-              <Trash2 size={14} /> Delete
+            <button
+              title="Delete Scenario"
+              onClick={() => handleDelete(viewing)}
+              style={{
+                background: "transparent", border: "none", color: "var(--text-secondary)",
+                cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-red)"; e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+            >
+              <Trash2 size={18} />
             </button>
           </div>
         </div>

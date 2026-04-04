@@ -89,12 +89,32 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
             Created: {(trade.created_at || "").replace("T", "  ").slice(0, 19)}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn btn-primary btn-sm" onClick={() => onEdit(trade)}>
-            <Pencil size={14} /> Edit Trade
+        <div style={{ display: "flex", gap: 6 }}>
+          <button
+            title="Edit Trade"
+            onClick={() => onEdit(trade)}
+            style={{
+              background: "transparent", border: "none", color: "var(--text-secondary)",
+              cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-blue)"; e.currentTarget.style.background = "rgba(59,130,246,0.1)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+          >
+            <Pencil size={18} />
           </button>
-          <button className="btn btn-danger btn-sm" onClick={handleDelete}>
-            <Trash2 size={14} /> Delete
+          <button
+            title="Delete Trade"
+            onClick={handleDelete}
+            style={{
+              background: "transparent", border: "none", color: "var(--text-secondary)",
+              cursor: "pointer", padding: 8, borderRadius: 8, display: "flex", alignItems: "center",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-red)"; e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.background = "transparent"; }}
+          >
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
