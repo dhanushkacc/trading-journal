@@ -84,16 +84,7 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* ─── Header ─────────────────────────────────── */}
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 28px",
-          background: "var(--bg-secondary)",
-          borderBottom: "1px solid var(--border)",
-        }}
-      >
+      <header className="app-header">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div
             style={{
