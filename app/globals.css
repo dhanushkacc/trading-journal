@@ -415,3 +415,92 @@ textarea.input {
   align-items: center;
   gap: 8px;
 }
+
+/* Responsive Design */
+
+/* Grid utility for 4 columns on desktop, 1 on mobile */
+.grid-4-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* Grid utility for trade rows */
+.trade-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 24px;
+}
+
+/* Flex responsive app header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 900px) {
+  .trade-row {
+    grid-template-columns: 1fr 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .trade-row > div:nth-child(1) {
+    grid-column: 1 / -1; /* Pair info full width */
+  }
+  
+  .trade-row > div:nth-child(5) {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-4-1 {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+
+  .filter-group .input {
+    width: 100%;
+  }
+  
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 24px;
+  }
+  
+  .tab-bar {
+    overflow-x: auto;
+    width: 100%;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  /* Make content containers adapt */
+  body {
+    overflow-x: hidden;
+  }
+}
