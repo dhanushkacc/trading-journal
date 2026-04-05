@@ -12,13 +12,11 @@ const config: AppConfig = {
     { id: "s", label: "S Candle" },
     { id: "B", label: "B Signal" },
     { id: "long", label: "Long Signal" },
-    { id: "buy_extrem_zone", label: "Buy Extrem Zone" },
   ],
   sell_confirmations: [
     { id: "r", label: "Resistance" },
     { id: "S", label: "Bearish Signal" },
     { id: "short", label: "Short Setup" },
-    { id: "sell_extrem_zone", label: "Sell Extrem Zone" },
   ],
   common_confirmations: [
     { id: "rsi_div", label: "RSI Divergence" },

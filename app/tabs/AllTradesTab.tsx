@@ -182,7 +182,15 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {filtered.map((trade) => (
           <div key={trade.trade_id} className="card" style={{ padding: 0 }}>
-            <div className="trade-row">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr 1fr auto",
+                alignItems: "center",
+                gap: 8,
+                padding: "18px 24px",
+              }}
+            >
               {/* Pair & Direction */}
               <div>
                 <div

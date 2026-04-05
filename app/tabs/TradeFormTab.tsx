@@ -242,7 +242,15 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
       </div>
 
       {/* Main fields */}
-      <div className="card grid-4-1" style={{ marginBottom: 20 }}>
+      <div
+        className="card"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr 1fr",
+          gap: 16,
+          marginBottom: 20,
+        }}
+      >
         <div>
           <label style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
             Pair
