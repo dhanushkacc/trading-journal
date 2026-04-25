@@ -634,10 +634,45 @@ export default function ScenariosTab() {
             </div>
           ))}
         </div>
+        {(() => {
+          const available = allTags.filter((t) => !fTags.includes(t));
+          if (available.length > 0) {
+            return (
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
+                  Click to add existing tags:
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {available.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setFTags((prev) => [...prev, t])}
+                      style={{
+                        background: "var(--bg-secondary)",
+                        border: "1px dashed var(--border)",
+                        color: "var(--text-secondary)",
+                        padding: "4px 10px",
+                        borderRadius: 16,
+                        fontSize: 12,
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--accent-blue)"; e.currentTarget.style.borderColor = "var(--accent-blue)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+                    >
+                      + {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          return null;
+        })()}
         <div style={{ display: "flex", gap: 8, maxWidth: 300 }}>
           <input
             className="input"
-            placeholder="e.g. Bullish"
+            placeholder="Type new or custom tag..."
             value={fTagInput}
             onChange={(e) => setFTagInput(e.target.value)}
             onKeyDown={(e) => {
