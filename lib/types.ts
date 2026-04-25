@@ -27,6 +27,7 @@ export interface Scenario {
   id?: string;
   scenario_id: string;
   title: string;
+  tags: string[];
   notes: string[];
   images: string[];  // URLs from supabase storage
   created_at: string;

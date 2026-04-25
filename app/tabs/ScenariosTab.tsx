@@ -24,6 +24,7 @@ import {
   StickyNote,
   Camera,
   ArrowLeft,
+  Tag,
 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -44,6 +45,9 @@ export default function ScenariosTab() {
   const [toastKey, setToastKey] = useState(0);
   const [viewImg, setViewImg] = useState<string | null>(null);
   
+  // Tag filter state
+  const [filterTag, setFilterTag] = useState("");
+
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<Scenario | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -53,6 +57,8 @@ export default function ScenariosTab() {
   const [fNotes, setFNotes] = useState<string[]>([""]);
   const [fImages, setFImages] = useState<string[]>([]);
   const [fPendingFiles, setFPendingFiles] = useState<File[]>([]);
+  const [fTags, setFTags] = useState<string[]>([]);
+  const [fTagInput, setFTagInput] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchAll = useCallback(async () => {
@@ -82,6 +88,8 @@ export default function ScenariosTab() {
     setFNotes([""]);
     setFImages([]);
     setFPendingFiles([]);
+    setFTags([]);
+    setFTagInput("");
     setEditing(null);
   };
 
@@ -95,6 +103,8 @@ export default function ScenariosTab() {
     setFTitle(s.title);
     setFNotes(s.notes.length ? [...s.notes] : [""]);
     setFImages([...s.images]);
+    setFTags(s.tags?.length ? [...s.tags] : []);
+    setFTagInput("");
     setFPendingFiles([]);
     setMode("form");
   };
@@ -125,6 +135,17 @@ export default function ScenariosTab() {
   const removeNote = (i: number) =>
     setFNotes((prev) => (prev.length <= 1 ? [""] : prev.filter((_, idx) => idx !== i)));
 
+  const handleAddTag = () => {
+    if (!fTagInput.trim()) return;
+    const t = fTagInput.trim();
+    if (!fTags.includes(t)) setFTags((prev) => [...prev, t]);
+    setFTagInput("");
+  };
+
+  const handleRemoveTag = (t: string) => {
+    setFTags((prev) => prev.filter((x) => x !== t));
+  };
+
   const handleSaveScenario = async () => {
     if (!fTitle.trim()) {
       alert("Please enter a scenario title.");
@@ -151,6 +172,7 @@ export default function ScenariosTab() {
         const updated: Scenario = {
           ...editing,
           title: fTitle.trim(),
+          tags: fTags,
           notes,
           images: uploadedUrls,
           updated_at: now,
@@ -161,6 +183,7 @@ export default function ScenariosTab() {
         const newScenario: Scenario = {
           scenario_id: makeScenarioId(),
           title: fTitle.trim(),
+          tags: fTags,
           notes,
           images: uploadedUrls,
           created_at: now,
@@ -200,6 +223,11 @@ export default function ScenariosTab() {
 
   // ── Renders ──
 
+  const allTags = Array.from(new Set(scenarios.flatMap((s) => s.tags || []))).sort();
+  const displayScenarios = filterTag
+    ? scenarios.filter((s) => (s.tags || []).includes(filterTag))
+    : scenarios;
+
   const renderList = () => (
     <div>
       <div
@@ -214,9 +242,26 @@ export default function ScenariosTab() {
           <Microscope size={22} color="var(--accent-purple)" />
           Inspection Scenarios
         </h2>
-        <button className="btn btn-success" onClick={openCreate}>
-          <Plus size={16} /> New Scenario
-        </button>
+        <div style={{ display: "flex", gap: 10 }}>
+          {allTags.length > 0 && (
+            <select
+              className="input"
+              value={filterTag}
+              onChange={(e) => setFilterTag(e.target.value)}
+              style={{ width: 160, padding: "8px 12px" }}
+            >
+              <option value="">All Tags</option>
+              {allTags.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          )}
+          <button className="btn btn-success" onClick={openCreate}>
+            <Plus size={16} /> New Scenario
+          </button>
+        </div>
       </div>
 
       {loading && (
@@ -244,7 +289,7 @@ export default function ScenariosTab() {
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {scenarios.map((s) => (
+        {displayScenarios.map((s) => (
           <div
             key={s.scenario_id}
             className="card"
@@ -297,6 +342,25 @@ export default function ScenariosTab() {
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
                 {s.title}
               </h3>
+              {(s.tags || []).length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                  {s.tags!.map((t) => (
+                    <span
+                      key={t}
+                      style={{
+                        background: "rgba(59,130,246,0.1)",
+                        color: "var(--accent-blue)",
+                        padding: "2px 8px",
+                        borderRadius: 12,
+                        fontSize: 11,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
                 🗓 {s.updated_at?.replace("T", "  ").slice(0, 18)} &nbsp;·&nbsp;
                 {s.images.length} image(s) &nbsp;·&nbsp; {s.notes.length} note(s)
@@ -404,6 +468,25 @@ export default function ScenariosTab() {
               &nbsp;·&nbsp; {viewing.images.length} image(s) &nbsp;·&nbsp;{" "}
               {viewing.notes.length} note(s)
             </p>
+            {(viewing.tags || []).length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                {viewing.tags!.map((t) => (
+                  <span
+                    key={t}
+                    style={{
+                      background: "rgba(59,130,246,0.1)",
+                      color: "var(--accent-blue)",
+                      padding: "4px 10px",
+                      borderRadius: 16,
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             <button
@@ -510,6 +593,64 @@ export default function ScenariosTab() {
           onChange={(e) => setFTitle(e.target.value)}
           style={{ marginTop: 6 }}
         />
+      </div>
+
+      {/* Tags */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <h3 className="section-heading" style={{ marginBottom: 12 }}>
+          <Tag size={16} /> Tags
+        </h3>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
+          {fTags.map((t) => (
+            <div
+              key={t}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                background: "rgba(59,130,246,0.1)",
+                color: "var(--accent-blue)",
+                padding: "4px 10px",
+                borderRadius: 16,
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+            >
+              {t}
+              <button
+                onClick={() => handleRemoveTag(t)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "inherit",
+                  cursor: "pointer",
+                  display: "flex",
+                  padding: 0,
+                  opacity: 0.7,
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8, maxWidth: 300 }}>
+          <input
+            className="input"
+            placeholder="e.g. Bullish"
+            value={fTagInput}
+            onChange={(e) => setFTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddTag();
+              }
+            }}
+          />
+          <button className="btn btn-secondary" onClick={handleAddTag} type="button">
+            Add
+          </button>
+        </div>
       </div>
 
       {/* Screenshots */}

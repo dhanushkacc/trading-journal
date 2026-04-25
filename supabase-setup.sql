@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS scenarios (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   scenario_id TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL,
+  tags JSONB DEFAULT '[]',
   notes JSONB DEFAULT '[]',
   images JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT now(),
