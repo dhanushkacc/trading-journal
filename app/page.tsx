@@ -6,19 +6,22 @@ import {
   Microscope,
   TrendingUp,
   Activity,
+  Wallet,
 } from "lucide-react";
 import TradesTab from "./tabs/TradesTab";
+import AccountsTab from "./tabs/AccountsTab";
 import ScenariosTab from "./tabs/ScenariosTab";
 import OrderFlowTab from "./tabs/OrderFlowTab";
-import { Trade } from "@/lib/types";
-import { loadTrades } from "@/lib/api";
+import { Trade, TradingAccount } from "@/lib/types";
+import { loadTrades, loadAccounts } from "@/lib/api";
 import { computeTradeStats } from "@/lib/stats";
 
-type Tab = "trades" | "scenarios" | "orderflow";
+type Tab = "trades" | "accounts" | "scenarios" | "orderflow";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("trades");
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [accounts, setAccounts] = useState<TradingAccount[]>([]);
 
   const refreshTrades = useCallback(async () => {
     try {
@@ -29,12 +32,23 @@ export default function Home() {
     }
   }, []);
 
+  const refreshAccounts = useCallback(async () => {
+    try {
+      const data = await loadAccounts();
+      setAccounts(data);
+    } catch (err) {
+      console.error("Failed to load accounts", err);
+    }
+  }, []);
+
   useEffect(() => {
     refreshTrades();
-  }, [refreshTrades]);
+    refreshAccounts();
+  }, [refreshTrades, refreshAccounts]);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "trades", label: "Trades", icon: <BarChart3 size={16} /> },
+    { id: "accounts", label: "Accounts", icon: <Wallet size={16} /> },
     { id: "scenarios", label: "Scenarios", icon: <Microscope size={16} /> },
     { id: "orderflow", label: "Order Flow", icon: <Activity size={16} /> },
   ];
@@ -112,7 +126,10 @@ export default function Home() {
       {/* ─── Content ────────────────────────────────── */}
       <main style={{ flex: 1, padding: "20px 28px 28px", overflow: "auto" }}>
         {activeTab === "trades" && (
-          <TradesTab trades={trades} onRefresh={refreshTrades} />
+          <TradesTab trades={trades} accounts={accounts} onRefresh={refreshTrades} />
+        )}
+        {activeTab === "accounts" && (
+          <AccountsTab accounts={accounts} trades={trades} onRefresh={refreshAccounts} />
         )}
         {activeTab === "scenarios" && <ScenariosTab />}
         {activeTab === "orderflow" && <OrderFlowTab />}

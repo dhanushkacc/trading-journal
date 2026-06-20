@@ -19,6 +19,7 @@ import {
   DollarSign,
   Target,
   PlusCircle,
+  ArrowLeft,
 } from "lucide-react";
 
 interface Props {
@@ -26,9 +27,19 @@ interface Props {
   onViewTrade: (trade: Trade) => void;
   onNewTrade: () => void;
   onRefresh: () => void;
+  accountName?: string;
+  accountType?: string;
+  onBack?: () => void;
 }
 
-export default function AllTradesTab({ trades, onViewTrade, onNewTrade }: Props) {
+export default function AllTradesTab({
+  trades,
+  onViewTrade,
+  onNewTrade,
+  accountName,
+  accountType,
+  onBack,
+}: Props) {
   const [fPair, setFPair] = useState("All");
   const [fDir, setFDir] = useState("All");
   const [fType, setFType] = useState("All");
@@ -98,10 +109,22 @@ export default function AllTradesTab({ trades, onViewTrade, onNewTrade }: Props)
           marginBottom: 20,
         }}
       >
-        <h2 style={{ fontSize: 22, fontWeight: 700, display: "flex", alignItems: "center", gap: 10 }}>
-          <BarChart3 size={22} color="var(--accent-blue)" />
-          Trades
-        </h2>
+        <div>
+          {onBack && (
+            <button className="btn btn-ghost btn-sm" onClick={onBack} style={{ marginBottom: 10 }}>
+              <ArrowLeft size={14} /> Back to Accounts
+            </button>
+          )}
+          <h2 style={{ fontSize: 22, fontWeight: 700, display: "flex", alignItems: "center", gap: 10 }}>
+            <BarChart3 size={22} color="var(--accent-blue)" />
+            {accountName || "Trades"}
+          </h2>
+          {accountType && (
+            <span className="badge badge-blue" style={{ marginTop: 8 }}>
+              {accountType}
+            </span>
+          )}
+        </div>
         <button className="btn btn-success" onClick={onNewTrade}>
           <PlusCircle size={16} /> New Trade
         </button>

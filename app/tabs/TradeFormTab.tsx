@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trade, TimeframeAnalysis } from "@/lib/types";
+import { Trade, TimeframeAnalysis, TradingAccount } from "@/lib/types";
 import config from "@/lib/config";
 import { saveTrade, updateTrade, uploadImage } from "@/lib/api";
 import ImageGallery from "@/components/ImageGallery";
@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from "uuid";
 
 interface Props {
   editingTrade: Trade | null;
+  accounts: TradingAccount[];
+  defaultAccountId: string;
   onSaved: () => void;
   onCancel: () => void;
 }
@@ -21,7 +23,14 @@ function makeTradeId(pair: string) {
   return `${d}_${clean}_${uuidv4().slice(0, 4)}`;
 }
 
-export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props) {
+export default function TradeFormTab({
+  editingTrade,
+  accounts,
+  defaultAccountId,
+  onSaved,
+  onCancel,
+}: Props) {
+  const [accountId, setAccountId] = useState(defaultAccountId);
   const [pair, setPair] = useState("BTC/USD");
   const [direction, setDirection] = useState("Buy");
   const [tradeType, setTradeType] = useState("Counter Trend");
@@ -68,6 +77,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
   // Populate when editing
   useEffect(() => {
     if (!editingTrade) return;
+    setAccountId(editingTrade.account_id || defaultAccountId);
     setPair(editingTrade.pair);
     setDirection(editingTrade.direction);
     setTradeType(editingTrade.trade_type);
@@ -102,7 +112,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
     setConfirmations(newConf);
     setAgainstConfirmations(newAgainst);
     setTfParams(newParams);
-  }, [editingTrade]);
+  }, [editingTrade, defaultAccountId]);
 
   const addImages = (tf: string, phase: string, files: File[]) => {
     setTfData((prev) => {
@@ -190,6 +200,7 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
 
       const trade: Trade = {
         trade_id: editingTrade ? editingTrade.trade_id : makeTradeId(pair),
+        account_id: accountId,
         pair,
         direction,
         trade_type: tradeType,
@@ -243,6 +254,23 @@ export default function TradeFormTab({ editingTrade, onSaved, onCancel }: Props)
 
       {/* Main fields */}
       <div className="card grid-4-1" style={{ marginBottom: 20 }}>
+        <div>
+          <label style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
+            Account
+          </label>
+          <select
+            className="input"
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+          >
+            {accounts.length === 0 && <option value="">No accounts</option>}
+            {accounts.map((a) => (
+              <option key={a.account_id} value={a.account_id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>
             Pair

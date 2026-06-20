@@ -3,10 +3,22 @@
 -- Run this in: Supabase Dashboard > SQL Editor
 -- ============================================
 
+-- 0. Create trading_accounts table
+CREATE TABLE IF NOT EXISTS trading_accounts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  account_id TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT DEFAULT '',
+  initial_balance TEXT DEFAULT '0',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- 1. Create trades table
 CREATE TABLE IF NOT EXISTS trades (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   trade_id TEXT UNIQUE NOT NULL,
+  account_id TEXT DEFAULT '',
   pair TEXT NOT NULL,
   direction TEXT NOT NULL,
   trade_type TEXT DEFAULT '',
@@ -33,6 +45,9 @@ CREATE TABLE IF NOT EXISTS scenarios (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 1b. If the trades table already existed, add the account_id column
+ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_id TEXT DEFAULT '';
+
 -- 2b. Create order_flows table
 CREATE TABLE IF NOT EXISTS order_flows (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -49,11 +64,13 @@ CREATE TABLE IF NOT EXISTS order_flows (
 ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_flows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trading_accounts ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations for anon users (tighten this with auth later)
 CREATE POLICY "Allow all on trades" ON trades FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all on scenarios" ON scenarios FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all on order_flows" ON order_flows FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all on trading_accounts" ON trading_accounts FOR ALL USING (true) WITH CHECK (true);
 
 -- 4. Create storage bucket for screenshots
 -- Note: Create this in Supabase Dashboard > Storage > New Bucket
