@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Trade } from "@/lib/types";
 import config from "@/lib/config";
+import { computeTradeStats } from "@/lib/stats";
 import {
   Search,
   ArrowUpRight,
@@ -13,6 +14,10 @@ import {
   Eye,
   Filter,
   RotateCcw,
+  BarChart3,
+  Percent,
+  DollarSign,
+  Target,
 } from "lucide-react";
 
 interface Props {
@@ -41,6 +46,16 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
       return true;
     });
   }, [trades, fPair, fDir, fType, fOut, fFrom, fTo]);
+
+  const stats = useMemo(() => computeTradeStats(filtered), [filtered]);
+  const decided = Math.max(stats.decided, 1);
+  const total = Math.max(stats.total, 1);
+  const pnlColor =
+    stats.netPnl > 0
+      ? "var(--accent-green)"
+      : stats.netPnl < 0
+      ? "var(--accent-red)"
+      : "var(--text-primary)";
 
   const resetFilters = () => {
     setFPair("All");
@@ -72,6 +87,63 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
 
   return (
     <div>
+      {/* Stats dashboard */}
+      <div className="stat-grid stagger">
+        <div className="stat-card">
+          <BarChart3 size={20} className="sc-icon" color="var(--accent-blue)" />
+          <div className="sc-label">Total Trades</div>
+          <div className="sc-value">{stats.total}</div>
+          <div className="sc-sub">{stats.decided} decided · {stats.breakEven} break-even</div>
+        </div>
+        <div className="stat-card accent-green">
+          <Percent size={20} className="sc-icon" color="var(--accent-green)" />
+          <div className="sc-label">Win Rate</div>
+          <div className="sc-value">{stats.winRate.toFixed(0)}%</div>
+          <div className="sc-sub">{stats.wins}W · {stats.losses}L</div>
+        </div>
+        <div className={`stat-card ${stats.netPnl < 0 ? "accent-red" : "accent-green"}`}>
+          <DollarSign size={20} className="sc-icon" color={pnlColor} />
+          <div className="sc-label">Net P&amp;L</div>
+          <div className="sc-value" style={{ color: pnlColor }}>
+            {stats.netPnl >= 0 ? "+" : "-"}${Math.abs(stats.netPnl).toLocaleString()}
+          </div>
+          <div className="sc-sub">across {stats.total} trade(s)</div>
+        </div>
+        <div className="stat-card accent-amber">
+          <Target size={20} className="sc-icon" color="var(--accent-amber)" />
+          <div className="sc-label">Avg Target R:R</div>
+          <div className="sc-value">1:{stats.avgTargetRR.toFixed(1)}</div>
+          <div className="sc-sub">planned reward / risk</div>
+        </div>
+      </div>
+
+      {/* Win / Loss / Break-even bar */}
+      {stats.total > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <div className="winloss-bar">
+            <span className="wl-win" style={{ width: `${(stats.wins / total) * 100}%` }} />
+            <span className="wl-loss" style={{ width: `${(stats.losses / total) * 100}%` }} />
+            <span className="wl-be" style={{ width: `${(stats.breakEven / total) * 100}%` }} />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              gap: 16,
+              marginTop: 8,
+              fontSize: 12,
+              color: "var(--text-muted)",
+            }}
+          >
+            <span style={{ color: "var(--accent-green)" }}>● {stats.wins} Wins</span>
+            <span style={{ color: "var(--accent-red)" }}>● {stats.losses} Losses</span>
+            <span>● {stats.breakEven} Break-even</span>
+            <span style={{ marginLeft: "auto" }}>
+              {((stats.wins / decided) * 100).toFixed(0)}% win rate (decided)
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Filter bar */}
       <div className="filter-bar">
         <div
@@ -179,9 +251,20 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
       </p>
 
       {/* Trade cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {filtered.map((trade) => (
-          <div key={trade.trade_id} className="card" style={{ padding: 0 }}>
+      <div className="stagger" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {filtered.map((trade) => {
+          const accent =
+            trade.outcome === "Win"
+              ? "var(--accent-green)"
+              : trade.outcome === "Loss"
+              ? "var(--accent-red)"
+              : "var(--text-muted)";
+          return (
+          <div
+            key={trade.trade_id}
+            className="card"
+            style={{ padding: 0, borderLeft: `3px solid ${accent}`, overflow: "hidden" }}
+          >
             <div className="trade-row">
               {/* Pair & Direction */}
               <div>
@@ -273,43 +356,22 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
 
               {/* Action */}
               <button
+                className="icon-btn"
                 title="View Trade"
                 onClick={() => onViewTrade(trade)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "var(--text-secondary)",
-                  cursor: "pointer",
-                  padding: 8,
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  transition: "all 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "var(--accent-blue)";
-                  e.currentTarget.style.background = "rgba(59,130,246,0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "var(--text-secondary)";
-                  e.currentTarget.style.background = "transparent";
-                }}
               >
                 <Eye size={18} />
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {filtered.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "60px 0",
-              color: "var(--text-muted)",
-            }}
-          >
-            <Search size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
+          <div className="empty-state">
+            <div className="es-icon">
+              <Search size={32} />
+            </div>
             <p style={{ fontSize: 15 }}>No trades match the current filters.</p>
           </div>
         )}

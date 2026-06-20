@@ -34,6 +34,17 @@ export interface Scenario {
   updated_at: string;
 }
 
+export interface OrderFlow {
+  id?: string;
+  order_flow_id: string;
+  title: string;
+  tags: string[];
+  notes: string[];   // each item is rich-text HTML for one bullet point
+  images: string[];  // URLs from supabase storage
+  created_at: string;
+  updated_at: string;
+}
+
 // Config types
 export interface Confirmation {
   id: string;

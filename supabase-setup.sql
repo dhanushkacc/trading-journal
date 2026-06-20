@@ -33,13 +33,27 @@ CREATE TABLE IF NOT EXISTS scenarios (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 2b. Create order_flows table
+CREATE TABLE IF NOT EXISTS order_flows (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_flow_id TEXT UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  tags JSONB DEFAULT '[]',
+  notes JSONB DEFAULT '[]',   -- array of rich-text HTML strings (one per bullet point)
+  images JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- 3. Enable Row Level Security (public access for now — add auth later)
 ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_flows ENABLE ROW LEVEL SECURITY;
 
 -- Allow all operations for anon users (tighten this with auth later)
 CREATE POLICY "Allow all on trades" ON trades FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all on scenarios" ON scenarios FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all on order_flows" ON order_flows FOR ALL USING (true) WITH CHECK (true);
 
 -- 4. Create storage bucket for screenshots
 -- Note: Create this in Supabase Dashboard > Storage > New Bucket

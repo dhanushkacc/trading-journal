@@ -74,7 +74,7 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
   const phases = config.phases;
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+    <div className="animate-in" style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
       {/* Header */}
       <div
         style={{
