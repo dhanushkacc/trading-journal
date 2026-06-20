@@ -9,6 +9,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import {
   ArrowUpRight,
   ArrowDownRight,
+  ArrowLeft,
   Pencil,
   Trash2,
   FileText,
@@ -20,9 +21,10 @@ interface Props {
   trade: Trade | null;
   onEdit: (trade: Trade) => void;
   onDelete: () => void;
+  onBack: () => void;
 }
 
-export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
+export default function TradeDetailTab({ trade, onEdit, onDelete, onBack }: Props) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -85,6 +87,13 @@ export default function TradeDetailTab({ trade, onEdit, onDelete }: Props) {
         }}
       >
         <div>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={onBack}
+            style={{ marginBottom: 10 }}
+          >
+            <ArrowLeft size={14} /> Back to List
+          </button>
           <h2
             style={{
               fontSize: 22,
