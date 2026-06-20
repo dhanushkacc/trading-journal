@@ -7,16 +7,18 @@ import {
   TrendingUp,
   Activity,
   Wallet,
+  AlertTriangle,
 } from "lucide-react";
 import TradesTab from "./tabs/TradesTab";
 import AccountsTab from "./tabs/AccountsTab";
 import ScenariosTab from "./tabs/ScenariosTab";
 import OrderFlowTab from "./tabs/OrderFlowTab";
+import DumbTradesTab from "./tabs/DumbTradesTab";
 import { Trade, TradingAccount } from "@/lib/types";
 import { loadTrades, loadAccounts } from "@/lib/api";
 import { computeTradeStats } from "@/lib/stats";
 
-type Tab = "trades" | "accounts" | "scenarios" | "orderflow";
+type Tab = "trades" | "accounts" | "scenarios" | "orderflow" | "dumbtrades";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("trades");
@@ -51,6 +53,7 @@ export default function Home() {
     { id: "accounts", label: "Accounts", icon: <Wallet size={16} /> },
     { id: "scenarios", label: "Scenarios", icon: <Microscope size={16} /> },
     { id: "orderflow", label: "Order Flow", icon: <Activity size={16} /> },
+    { id: "dumbtrades", label: "Dumb Trades", icon: <AlertTriangle size={16} /> },
   ];
 
   const stats = computeTradeStats(trades);
@@ -133,6 +136,7 @@ export default function Home() {
         )}
         {activeTab === "scenarios" && <ScenariosTab />}
         {activeTab === "orderflow" && <OrderFlowTab />}
+        {activeTab === "dumbtrades" && <DumbTradesTab />}
       </main>
     </div>
   );

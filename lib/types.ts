@@ -56,6 +56,17 @@ export interface OrderFlow {
   updated_at: string;
 }
 
+export interface DumbTrade {
+  id?: string;
+  dumb_trade_id: string;
+  title: string;
+  tags: string[];
+  notes: string[];   // each item is rich-text HTML for one bullet point
+  images: string[];  // URLs from supabase storage
+  created_at: string;
+  updated_at: string;
+}
+
 // Config types
 export interface Confirmation {
   id: string;

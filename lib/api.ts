@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { Trade, Scenario, OrderFlow, TradingAccount } from "./types";
+import { Trade, Scenario, OrderFlow, DumbTrade, TradingAccount } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
 // ─── Image Compression ────────────────────────────────────────────────────
@@ -208,5 +208,40 @@ export async function deleteOrderFlow(orderFlow: OrderFlow): Promise<void> {
     .from("order_flows")
     .delete()
     .eq("order_flow_id", orderFlow.order_flow_id);
+  if (error) throw error;
+}
+
+// ─── Dumb Trade CRUD ──────────────────────────────────────────────────────
+export async function loadDumbTrades(): Promise<DumbTrade[]> {
+  const { data, error } = await supabase
+    .from("dumb_trades")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data || []) as DumbTrade[];
+}
+
+export async function saveDumbTrade(dumbTrade: DumbTrade): Promise<void> {
+  const { error } = await supabase.from("dumb_trades").insert(dumbTrade);
+  if (error) throw error;
+}
+
+export async function updateDumbTrade(dumbTrade: DumbTrade): Promise<void> {
+  const { error } = await supabase
+    .from("dumb_trades")
+    .update(dumbTrade)
+    .eq("dumb_trade_id", dumbTrade.dumb_trade_id);
+  if (error) throw error;
+}
+
+export async function deleteDumbTrade(dumbTrade: DumbTrade): Promise<void> {
+  // Delete images from storage
+  for (const url of dumbTrade.images || []) {
+    await deleteImage(url);
+  }
+  const { error } = await supabase
+    .from("dumb_trades")
+    .delete()
+    .eq("dumb_trade_id", dumbTrade.dumb_trade_id);
   if (error) throw error;
 }
