@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { Trade, Scenario } from "./types";
+import { Trade, Scenario, OrderFlow } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
 // ─── Image Compression ────────────────────────────────────────────────────
@@ -141,5 +141,40 @@ export async function deleteScenario(scenario: Scenario): Promise<void> {
     .from("scenarios")
     .delete()
     .eq("scenario_id", scenario.scenario_id);
+  if (error) throw error;
+}
+
+// ─── Order Flow CRUD ──────────────────────────────────────────────────────
+export async function loadOrderFlows(): Promise<OrderFlow[]> {
+  const { data, error } = await supabase
+    .from("order_flows")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data || []) as OrderFlow[];
+}
+
+export async function saveOrderFlow(orderFlow: OrderFlow): Promise<void> {
+  const { error } = await supabase.from("order_flows").insert(orderFlow);
+  if (error) throw error;
+}
+
+export async function updateOrderFlow(orderFlow: OrderFlow): Promise<void> {
+  const { error } = await supabase
+    .from("order_flows")
+    .update(orderFlow)
+    .eq("order_flow_id", orderFlow.order_flow_id);
+  if (error) throw error;
+}
+
+export async function deleteOrderFlow(orderFlow: OrderFlow): Promise<void> {
+  // Delete images from storage
+  for (const url of orderFlow.images || []) {
+    await deleteImage(url);
+  }
+  const { error } = await supabase
+    .from("order_flows")
+    .delete()
+    .eq("order_flow_id", orderFlow.order_flow_id);
   if (error) throw error;
 }

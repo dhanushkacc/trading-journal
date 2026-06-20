@@ -2,22 +2,24 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  BarChart3,
   List,
   PlusCircle,
   Eye,
   Microscope,
   TrendingUp,
+  Activity,
 } from "lucide-react";
 import Toast from "@/components/Toast";
 import AllTradesTab from "./tabs/AllTradesTab";
 import TradeDetailTab from "./tabs/TradeDetailTab";
 import TradeFormTab from "./tabs/TradeFormTab";
 import ScenariosTab from "./tabs/ScenariosTab";
+import OrderFlowTab from "./tabs/OrderFlowTab";
 import { Trade } from "@/lib/types";
 import { loadTrades } from "@/lib/api";
+import { computeTradeStats } from "@/lib/stats";
 
-type Tab = "all" | "detail" | "form" | "scenarios";
+type Tab = "all" | "detail" | "form" | "scenarios" | "orderflow";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("all");
@@ -79,7 +81,16 @@ export default function Home() {
     { id: "detail", label: "Trade Details", icon: <Eye size={16} /> },
     { id: "form", label: "New / Edit Trade", icon: <PlusCircle size={16} /> },
     { id: "scenarios", label: "Scenarios", icon: <Microscope size={16} /> },
+    { id: "orderflow", label: "Order Flow", icon: <Activity size={16} /> },
   ];
+
+  const stats = computeTradeStats(trades);
+  const pnlColor =
+    stats.netPnl > 0
+      ? "var(--accent-green)"
+      : stats.netPnl < 0
+      ? "var(--accent-red)"
+      : "var(--text-primary)";
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -107,26 +118,26 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div className="summary-pill">
+            <span className="sp-label">Trades</span>
+            <span className="sp-value">{stats.total}</span>
+          </div>
+          <div className="summary-pill">
+            <span className="sp-label">Win Rate</span>
+            <span className="sp-value" style={{ color: "var(--accent-blue)" }}>
+              {stats.winRate.toFixed(0)}%
+            </span>
+          </div>
+          <div className="summary-pill">
+            <span className="sp-label">Net P&amp;L</span>
+            <span className="sp-value" style={{ color: pnlColor }}>
+              {stats.netPnl >= 0 ? "+" : "-"}${Math.abs(stats.netPnl).toLocaleString()}
+            </span>
+          </div>
           <button className="btn btn-success" onClick={handleNewTrade}>
             <PlusCircle size={16} /> New Trade
           </button>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "0 16px",
-              background: "var(--bg-card)",
-              borderRadius: 10,
-              border: "1px solid var(--border)",
-            }}
-          >
-            <BarChart3 size={16} color="var(--accent-green)" />
-            <span style={{ fontSize: 13, fontWeight: 600 }}>
-              {trades.length} Trades
-            </span>
-          </div>
         </div>
       </header>
 
@@ -170,6 +181,7 @@ export default function Home() {
           />
         )}
         {activeTab === "scenarios" && <ScenariosTab />}
+        {activeTab === "orderflow" && <OrderFlowTab />}
       </main>
 
       {toastMsg && <Toast key={toastKey} message={toastMsg} />}
