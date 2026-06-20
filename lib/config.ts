@@ -7,6 +7,7 @@ const config: AppConfig = {
   directions: ["Buy", "Sell"],
   outcomes: ["Win", "Loss", "Break Even"],
   pairs: ["BTC/USD", "XAU/USD"],
+  account_types: ["Binance", "Bybit", "MT5", "OKX", "Other"],
   target_ratios: ["1:1", "1:2", "1:3", "1:5", "1:10"],
   buy_confirmations: [
     { id: "s", label: "S Candle" },

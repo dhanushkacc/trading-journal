@@ -6,9 +6,20 @@ export interface TimeframeAnalysis {
   images?: string[];  // URLs from supabase storage
 }
 
+export interface TradingAccount {
+  id?: string;
+  account_id: string;
+  name: string;
+  type: string;            // e.g. Binance, Bybit, MT5, OKX, Other
+  initial_balance: string; // stored as string, matching other numeric fields
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Trade {
   id?: string;
   trade_id: string;
+  account_id: string;      // owning trading account (empty for legacy trades)
   pair: string;
   direction: string;
   trade_type: string;
@@ -63,6 +74,7 @@ export interface AppConfig {
   directions: string[];
   outcomes: string[];
   pairs: string[];
+  account_types: string[];
   target_ratios: string[];
   buy_confirmations: Confirmation[];
   sell_confirmations: Confirmation[];

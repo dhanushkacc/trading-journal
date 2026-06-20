@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { Trade, Scenario, OrderFlow } from "./types";
+import { Trade, Scenario, OrderFlow, TradingAccount } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
 // ─── Image Compression ────────────────────────────────────────────────────
@@ -106,6 +106,38 @@ export async function deleteTrade(trade: Trade): Promise<void> {
     .from("trades")
     .delete()
     .eq("trade_id", trade.trade_id);
+  if (error) throw error;
+}
+
+// ─── Trading Account CRUD ─────────────────────────────────────────────────
+export async function loadAccounts(): Promise<TradingAccount[]> {
+  const { data, error } = await supabase
+    .from("trading_accounts")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data || []) as TradingAccount[];
+}
+
+export async function saveAccount(account: TradingAccount): Promise<void> {
+  const { error } = await supabase.from("trading_accounts").insert(account);
+  if (error) throw error;
+}
+
+export async function updateAccount(account: TradingAccount): Promise<void> {
+  const { error } = await supabase
+    .from("trading_accounts")
+    .update(account)
+    .eq("account_id", account.account_id);
+  if (error) throw error;
+}
+
+export async function deleteAccount(account: TradingAccount): Promise<void> {
+  // Trades keep their account_id and become unassigned; the account row is removed.
+  const { error } = await supabase
+    .from("trading_accounts")
+    .delete()
+    .eq("account_id", account.account_id);
   if (error) throw error;
 }
 
