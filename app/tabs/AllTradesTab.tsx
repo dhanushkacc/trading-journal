@@ -18,15 +18,17 @@ import {
   Percent,
   DollarSign,
   Target,
+  PlusCircle,
 } from "lucide-react";
 
 interface Props {
   trades: Trade[];
   onViewTrade: (trade: Trade) => void;
+  onNewTrade: () => void;
   onRefresh: () => void;
 }
 
-export default function AllTradesTab({ trades, onViewTrade }: Props) {
+export default function AllTradesTab({ trades, onViewTrade, onNewTrade }: Props) {
   const [fPair, setFPair] = useState("All");
   const [fDir, setFDir] = useState("All");
   const [fType, setFType] = useState("All");
@@ -87,6 +89,24 @@ export default function AllTradesTab({ trades, onViewTrade }: Props) {
 
   return (
     <div>
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <h2 style={{ fontSize: 22, fontWeight: 700, display: "flex", alignItems: "center", gap: 10 }}>
+          <BarChart3 size={22} color="var(--accent-blue)" />
+          Trades
+        </h2>
+        <button className="btn btn-success" onClick={onNewTrade}>
+          <PlusCircle size={16} /> New Trade
+        </button>
+      </div>
+
       {/* Stats dashboard */}
       <div className="stat-grid stagger">
         <div className="stat-card">
